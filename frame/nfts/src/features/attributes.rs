@@ -16,7 +16,49 @@
 // limitations under the License.
 
 use crate::*;
-use frame_support::pallet_prelude::*;
+use frame_support::{pallet_prelude::*, BoundedSlice};
+
+/// A trait for providing attribute namespace precedence interface.
+pub trait NamespacePrecedence<AccountId, CollectionId, ItemId, KeyLimit: Get<u32>> {
+	/// Returns the most authoritative attribute namespace for a given item and attribute key.
+	///
+	/// This function is meant to disambiguate different versions
+	/// of the same attribute inside different namespaces.
+	fn namespace_precedence(
+		collection: &CollectionId,
+		item: &ItemId,
+		key: BoundedSlice<u8, KeyLimit>,
+	) -> AttributeNamespace<AccountId>;
+}
+
+/// Default attribute namespace precedence:
+/// * collection owner -- **the highest**
+/// * item owner
+/// * pallet -- **the lowest**
+///
+/// Pre-approved account is always ignored.
+pub struct DefaultNamespacePrecedence<T, I: 'static = ()>(PhantomData<(T, I)>);
+impl<T: Config<I>, I: 'static>
+	NamespacePrecedence<T::AccountId, T::CollectionId, T::ItemId, T::KeyLimit>
+	for DefaultNamespacePrecedence<T, I>
+{
+	fn namespace_precedence(
+		collection: &T::CollectionId,
+		item: &T::ItemId,
+		key: BoundedSlice<u8, T::KeyLimit>,
+	) -> AttributeNamespace<T::AccountId> {
+		[
+			AttributeNamespace::CollectionOwner,
+			AttributeNamespace::ItemOwner,
+			AttributeNamespace::Pallet,
+		]
+		.into_iter()
+		.find(|namespace| {
+			Attribute::<T, I>::get((collection, Some(item), namespace, key)).is_some()
+		})
+		.unwrap_or(AttributeNamespace::CollectionOwner)
+	}
+}
 
 impl<T: Config<I>, I: 'static> Pallet<T, I> {
 	pub(crate) fn do_set_attribute(

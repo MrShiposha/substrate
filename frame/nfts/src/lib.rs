@@ -36,7 +36,7 @@ pub mod mock;
 mod tests;
 
 mod common_functions;
-mod features;
+pub mod features;
 mod impl_nonfungibles;
 mod types;
 
@@ -65,6 +65,7 @@ type AccountIdLookupOf<T> = <<T as SystemConfig>::Lookup as StaticLookup>::Sourc
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
+	use crate::features::attributes::NamespacePrecedence;
 	use frame_support::{pallet_prelude::*, traits::ExistenceRequirement};
 	use frame_system::pallet_prelude::*;
 
@@ -117,6 +118,14 @@ pub mod pallet {
 
 		/// Locker trait to enable Locking mechanism downstream.
 		type Locker: Locker<Self::CollectionId, Self::ItemId>;
+
+		/// The type used to normalize attributes.
+		type NamespacePrecedence: NamespacePrecedence<
+			Self::AccountId,
+			Self::CollectionId,
+			Self::ItemId,
+			Self::KeyLimit,
+		>;
 
 		/// The basic amount of funds that must be reserved for collection.
 		#[pallet::constant]

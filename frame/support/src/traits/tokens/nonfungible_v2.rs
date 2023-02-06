@@ -25,10 +25,7 @@
 //! use.
 
 use super::nonfungibles_v2 as nonfungibles;
-use crate::{
-	dispatch::DispatchResult,
-	traits::{tokens::misc::AttributeNamespace, Get},
-};
+use crate::{dispatch::DispatchResult, traits::Get};
 use codec::{Decode, Encode};
 use sp_runtime::TokenError;
 use sp_std::prelude::*;
@@ -45,23 +42,15 @@ pub trait Inspect<AccountId> {
 	/// Returns the attribute value of `item` corresponding to `key`.
 	///
 	/// By default this is `None`; no attributes are defined.
-	fn attribute(
-		_item: &Self::ItemId,
-		_namespace: &AttributeNamespace<AccountId>,
-		_key: &[u8],
-	) -> Option<Vec<u8>> {
+	fn attribute(_item: &Self::ItemId, _key: &[u8]) -> Option<Vec<u8>> {
 		None
 	}
 
 	/// Returns the strongly-typed attribute value of `item` corresponding to `key`.
 	///
 	/// By default this just attempts to use `attribute`.
-	fn typed_attribute<K: Encode, V: Decode>(
-		item: &Self::ItemId,
-		namespace: &AttributeNamespace<AccountId>,
-		key: &K,
-	) -> Option<V> {
-		key.using_encoded(|d| Self::attribute(item, namespace, d))
+	fn typed_attribute<K: Encode, V: Decode>(item: &Self::ItemId, key: &K) -> Option<V> {
+		key.using_encoded(|d| Self::attribute(item, d))
 			.and_then(|v| V::decode(&mut &v[..]).ok())
 	}
 
@@ -167,19 +156,11 @@ impl<
 	fn owner(item: &Self::ItemId) -> Option<AccountId> {
 		<F as nonfungibles::Inspect<AccountId>>::owner(&A::get(), item)
 	}
-	fn attribute(
-		item: &Self::ItemId,
-		namespace: &AttributeNamespace<AccountId>,
-		key: &[u8],
-	) -> Option<Vec<u8>> {
-		<F as nonfungibles::Inspect<AccountId>>::attribute(&A::get(), item, namespace, key)
+	fn attribute(item: &Self::ItemId, key: &[u8]) -> Option<Vec<u8>> {
+		<F as nonfungibles::Inspect<AccountId>>::attribute(&A::get(), item, key)
 	}
-	fn typed_attribute<K: Encode, V: Decode>(
-		item: &Self::ItemId,
-		namespace: &AttributeNamespace<AccountId>,
-		key: &K,
-	) -> Option<V> {
-		<F as nonfungibles::Inspect<AccountId>>::typed_attribute(&A::get(), item, namespace, key)
+	fn typed_attribute<K: Encode, V: Decode>(item: &Self::ItemId, key: &K) -> Option<V> {
+		<F as nonfungibles::Inspect<AccountId>>::typed_attribute(&A::get(), item, key)
 	}
 	fn can_transfer(item: &Self::ItemId) -> bool {
 		<F as nonfungibles::Inspect<AccountId>>::can_transfer(&A::get(), item)

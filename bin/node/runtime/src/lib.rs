@@ -1588,6 +1588,7 @@ impl pallet_nfts::Config for Runtime {
 	type Helper = ();
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type Locker = ();
+	type NamespacePrecedence = pallet_nfts::features::attributes::DefaultNamespacePrecedence<Self>;
 }
 
 impl pallet_transaction_storage::Config for Runtime {

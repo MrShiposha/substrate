@@ -27,10 +27,7 @@
 //! Implementations of these traits may be converted to implementations of corresponding
 //! `nonfungible` traits by using the `nonfungible::ItemOf` type adapter.
 
-use crate::{
-	dispatch::{DispatchError, DispatchResult},
-	traits::tokens::misc::AttributeNamespace,
-};
+use crate::dispatch::{DispatchError, DispatchResult};
 use codec::{Decode, Encode};
 use sp_runtime::TokenError;
 use sp_std::prelude::*;
@@ -61,7 +58,6 @@ pub trait Inspect<AccountId> {
 	fn attribute(
 		_collection: &Self::CollectionId,
 		_item: &Self::ItemId,
-		_namespace: &AttributeNamespace<AccountId>,
 		_key: &[u8],
 	) -> Option<Vec<u8>> {
 		None
@@ -74,10 +70,9 @@ pub trait Inspect<AccountId> {
 	fn typed_attribute<K: Encode, V: Decode>(
 		collection: &Self::CollectionId,
 		item: &Self::ItemId,
-		namespace: &AttributeNamespace<AccountId>,
 		key: &K,
 	) -> Option<V> {
-		key.using_encoded(|d| Self::attribute(collection, item, namespace, d))
+		key.using_encoded(|d| Self::attribute(collection, item, d))
 			.and_then(|v| V::decode(&mut &v[..]).ok())
 	}
 
