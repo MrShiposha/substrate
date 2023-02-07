@@ -2151,7 +2151,7 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_nfts_rpc_runtime_api::NftsApi<Block, AccountId, u32, u32>
+	impl pallet_nfts_runtime_api::NftsApi<Block, AccountId, u32, u32>
 		for Runtime
 	{
 		fn item_owner(collection: u32, item: u32) -> Option<AccountId> {

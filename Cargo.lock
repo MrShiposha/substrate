@@ -3537,7 +3537,7 @@ dependencies = [
  "pallet-mmr",
  "pallet-multisig",
  "pallet-nfts",
- "pallet-nfts-rpc-runtime-api",
+ "pallet-nfts-runtime-api",
  "pallet-nis",
  "pallet-nomination-pools",
  "pallet-nomination-pools-benchmarking",
@@ -5994,20 +5994,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-nfts-rpc"
-version = "4.0.0-dev"
-dependencies = [
- "frame-support",
- "jsonrpsee",
- "pallet-nfts-rpc-runtime-api",
- "parity-scale-codec",
- "sp-api",
- "sp-blockchain",
- "sp-runtime",
-]
-
-[[package]]
-name = "pallet-nfts-rpc-runtime-api"
+name = "pallet-nfts-runtime-api"
 version = "4.0.0-dev"
 dependencies = [
  "frame-support",
