@@ -18,12 +18,10 @@
 //! Implementations for `nonfungibles` traits.
 
 use super::*;
-use crate::features::attributes::NamespacePrecedence;
 use frame_support::{
 	ensure,
 	storage::KeyPrefixIterator,
 	traits::{tokens::nonfungibles_v2::*, Get},
-	BoundedSlice,
 };
 use sp_runtime::{DispatchError, DispatchResult};
 use sp_std::prelude::*;
@@ -36,14 +34,15 @@ impl<T: Config<I>, I: 'static> Inspect<<T as SystemConfig>::AccountId> for Palle
 		collection: &Self::CollectionId,
 		item: &Self::ItemId,
 	) -> Option<<T as SystemConfig>::AccountId> {
-		Item::<T, I>::get(collection, item).map(|a| a.owner)
+		Self::owner(*collection, *item)
 	}
 
 	fn collection_owner(collection: &Self::CollectionId) -> Option<<T as SystemConfig>::AccountId> {
-		Collection::<T, I>::get(collection).map(|a| a.owner)
+		Self::collection_owner(*collection)
 	}
 
-	/// Returns the attribute value of `item` of `collection` corresponding to `key`.
+	/// Returns the canonical version of the attribute value of `item` of `collection` corresponding
+	/// to `key`.
 	///
 	/// When `key` is empty, we return the item metadata value.
 	///
@@ -53,15 +52,7 @@ impl<T: Config<I>, I: 'static> Inspect<<T as SystemConfig>::AccountId> for Palle
 		item: &Self::ItemId,
 		key: &[u8],
 	) -> Option<Vec<u8>> {
-		if key.is_empty() {
-			// We make the empty key map to the item metadata value.
-			ItemMetadataOf::<T, I>::get(collection, item).map(|m| m.data.into())
-		} else {
-			let key = BoundedSlice::<_, _>::try_from(key).ok()?;
-			let namespace =
-				T::NamespacePrecedence::namespace_precedence(collection, item, key.clone());
-			Attribute::<T, I>::get((collection, Some(item), namespace, key)).map(|a| a.0.into())
-		}
+		Self::attribute(*collection, *item, key, None)
 	}
 
 	/// Returns the attribute value of `item` of `collection` corresponding to `key`.
@@ -70,19 +61,7 @@ impl<T: Config<I>, I: 'static> Inspect<<T as SystemConfig>::AccountId> for Palle
 	///
 	/// By default this is `None`; no attributes are defined.
 	fn collection_attribute(collection: &Self::CollectionId, key: &[u8]) -> Option<Vec<u8>> {
-		if key.is_empty() {
-			// We make the empty key map to the item metadata value.
-			CollectionMetadataOf::<T, I>::get(collection).map(|m| m.data.into())
-		} else {
-			let key = BoundedSlice::<_, _>::try_from(key).ok()?;
-			Attribute::<T, I>::get((
-				collection,
-				Option::<T::ItemId>::None,
-				AttributeNamespace::CollectionOwner,
-				key,
-			))
-			.map(|a| a.0.into())
-		}
+		Self::collection_attribute(*collection, key)
 	}
 
 	/// Returns `true` if the `item` of `collection` may be transferred.

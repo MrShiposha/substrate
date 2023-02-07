@@ -365,4 +365,38 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 	) -> Result<BoundedVec<u8, T::ValueLimit>, DispatchError> {
 		Ok(BoundedVec::try_from(value).map_err(|_| Error::<T, I>::IncorrectData)?)
 	}
+
+	pub fn attribute(
+		collection: T::CollectionId,
+		item: T::ItemId,
+		key: &[u8],
+		namespace: Option<AttributeNamespace<T::AccountId>>,
+	) -> Option<Vec<u8>> {
+		if key.is_empty() {
+			// We make the empty key map to the item metadata value.
+			ItemMetadataOf::<T, I>::get(collection, item).map(|m| m.data.into())
+		} else {
+			let key = BoundedSlice::<_, _>::try_from(key).ok()?;
+			let namespace = namespace.unwrap_or_else(|| {
+				T::NamespacePrecedence::namespace_precedence(&collection, &item, key.clone())
+			});
+			Attribute::<T, I>::get((collection, Some(item), namespace, key)).map(|a| a.0.into())
+		}
+	}
+
+	pub fn collection_attribute(collection: T::CollectionId, key: &[u8]) -> Option<Vec<u8>> {
+		if key.is_empty() {
+			// We make the empty key map to the item metadata value.
+			CollectionMetadataOf::<T, I>::get(collection).map(|m| m.data.into())
+		} else {
+			let key = BoundedSlice::<_, _>::try_from(key).ok()?;
+			Attribute::<T, I>::get((
+				collection,
+				Option::<T::ItemId>::None,
+				AttributeNamespace::CollectionOwner,
+				key,
+			))
+			.map(|a| a.0.into())
+		}
+	}
 }

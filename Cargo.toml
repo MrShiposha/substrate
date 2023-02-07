@@ -123,6 +123,8 @@ members = [
 	"frame/proxy",
 	"frame/message-queue",
 	"frame/nfts",
+	"frame/nfts/rpc",
+	"frame/nfts/rpc/runtime-api",
 	"frame/nomination-pools",
 	"frame/nomination-pools/fuzzer",
 	"frame/nomination-pools/benchmarking",

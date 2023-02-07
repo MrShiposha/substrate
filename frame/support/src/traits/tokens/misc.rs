@@ -23,6 +23,9 @@ use sp_core::RuntimeDebug;
 use sp_runtime::{ArithmeticError, DispatchError, TokenError};
 use sp_std::fmt::Debug;
 
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
+
 /// One of a number of consequences of withdrawing a fungible from an account.
 #[derive(Copy, Clone, RuntimeDebug, Eq, PartialEq)]
 pub enum WithdrawConsequence<Balance> {
@@ -130,6 +133,7 @@ pub enum BalanceStatus {
 #[derive(
 	Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, scale_info::TypeInfo, MaxEncodedLen,
 )]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum AttributeNamespace<AccountId> {
 	/// An attribute was set by the pallet.
 	Pallet,

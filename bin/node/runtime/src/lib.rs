@@ -32,10 +32,10 @@ use frame_support::{
 	pallet_prelude::Get,
 	parameter_types,
 	traits::{
-		fungible::ItemOf, AsEnsureOriginWithArg, ConstBool, ConstU128, ConstU16, ConstU32,
-		Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter,
-		KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote,
-		WithdrawReasons,
+		fungible::ItemOf, tokens::AttributeNamespace, AsEnsureOriginWithArg, ConstBool, ConstU128,
+		ConstU16, ConstU32, Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything, Imbalance,
+		InstanceFilter, KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced,
+		U128CurrencyToVote, WithdrawReasons,
 	},
 	weights::{
 		constants::{
@@ -2148,6 +2148,31 @@ impl_runtime_apis! {
 		}
 		fn query_length_to_fee(length: u32) -> Balance {
 			TransactionPayment::length_to_fee(length)
+		}
+	}
+
+	impl pallet_nfts_rpc_runtime_api::NftsApi<Block, AccountId, u32, u32>
+		for Runtime
+	{
+		fn item_owner(collection: u32, item: u32) -> Option<AccountId> {
+			Nfts::owner(collection, item)
+		}
+
+		fn collection_owner(collection: u32) -> Option<AccountId> {
+			Nfts::collection_owner(collection)
+		}
+
+		fn item_attribute(
+			collection: u32,
+			item: u32,
+			key: Vec<u8>,
+			namespace: Option<AttributeNamespace<AccountId>>
+		) -> Option<Vec<u8>> {
+			Nfts::attribute(collection, item, key.as_slice(), namespace)
+		}
+
+		fn collection_attribute(collection: u32, key: Vec<u8>) -> Option<Vec<u8>> {
+			Nfts::collection_attribute(collection, key.as_slice())
 		}
 	}
 

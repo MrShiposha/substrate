@@ -52,7 +52,8 @@ pub trait Inspect<AccountId> {
 		None
 	}
 
-	/// Returns the attribute value of `item` of `collection` corresponding to `key`.
+	/// Returns the canonical version of the attribute value of `item` of `collection` corresponding
+	/// to `key`.
 	///
 	/// By default this is `None`; no attributes are defined.
 	fn attribute(
